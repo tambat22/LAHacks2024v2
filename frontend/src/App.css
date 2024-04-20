@@ -1,0 +1,48 @@
+.App {
+  display: flex;
+  justify-content: center;
+  padding: 128px;
+  font-family: "Poppins", sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+img,
+video {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-container {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.btn-container button {
+  cursor: pointer;
+  display: inline-block;
+  outline: 0;
+  border: none;
+  padding: 16px 56px;
+  border-radius: 8px;
+  background-color: #0070f3;
+  color: white;
+  font-size: 16px;
+  box-shadow: 0 4px 14px 0 rgb(0 118 255 / 39%);
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-container button:hover {
+  background: rgba(0, 118, 255, 0.9);
+  box-shadow: 0 6px 20px rgb(0 118 255 / 23%);
+}
