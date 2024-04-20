@@ -23,7 +23,7 @@ const CustomWebcam = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      axios.post('http://localhost:5000/upload', formData, {
+      axios.post('http://127.0.0.1:5000/upload/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
