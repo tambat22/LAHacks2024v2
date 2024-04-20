@@ -165,5 +165,5 @@ cython_debug/
 
 #ignore test_imgs
 test_imgs/
-
+uploads/
 .DS_Store
