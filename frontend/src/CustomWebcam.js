@@ -5,7 +5,7 @@ import axios from 'axios';
 const CustomWebcam = () => {
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
-  const capture = useCallback(() => {
+  const capture = useCallback((gi) => {
     const imageSrc = webcamRef.current.getScreenshot();
     setImgSrc(imageSrc);
   }, [webcamRef]);

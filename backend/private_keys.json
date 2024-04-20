@@ -1,0 +1,18 @@
+{
+    "user-interaction-agent": {
+        "identity_key": "5a2dd464de60f33c95c9ecd5e9ec72f1cc7def3e1282c20ca7ab95cefb169acc",
+        "wallet_key": "2bJEwGLYuLBE9FvPgn1sF9VA/MoSnBHvaO8x0PvbYGM="
+    },
+    "image-processing-agent": {
+        "identity_key": "1c9376e9d92c0313b997dd1d3ce855c8d2ea01775c08ad2cf29ce3ceeee287d6",
+        "wallet_key": "xl7yPjP1Y497YBY6nXSbjRwhZ/Hd64YxdI00Z16MRHM="
+    },
+    "threat-detection-agent": {
+        "identity_key": "a10b24f6b9f6ebb1cb0a0be0e9ef46d82d735e0037b7c10339c646eb60733015",
+        "wallet_key": "2pjQpMjsMg9fVcJlQzhop+qaFK0rGAc+teon5KhJonA="
+    },
+    "emergency-handling-agent": {
+        "identity_key": "40aaaa6956c9733cdb2ab8b2bb3844f230be899d219e163dfe319ff9382b2f53",
+        "wallet_key": "sl3pbHemOG4wIZDwsPQ/1YdoN4u8IIa9b6DMIUaMiOk="
+    }
+}
