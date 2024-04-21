@@ -1,27 +1,18 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import Webcam from "react-webcam";
 import axios from 'axios';
 import ImageUploading from 'react-images-uploading';
+import { debounce } from 'lodash';
 
 const CustomWebcam = () => {
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
   const [images, setImages] = useState([]);
-  const [isSendingAutomatically, setIsSendingAutomatically] = useState(false);
-  const [sendIntervalId, setSendIntervalId] = useState(null);
-  const synthRef = useRef(window.speechSynthesis);
-
-  const capture = useCallback(() => {
-    if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      setImgSrc(imageSrc);
-      return imageSrc;
-    }
-  }, []);
 
   const sendImageToServer = (imageFile) => {
     const formData = new FormData();
     formData.append("file", imageFile);
+
     axios.post('http://localhost:5000/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -29,30 +20,18 @@ const CustomWebcam = () => {
     })
     .then(response => {
       console.log('Image uploaded successfully:', response.data);
-      speak(response.data.message);
     })
     .catch(error => {
       console.error('Error uploading image:', error);
     });
   };
 
-  const speak = (text) => {
-    if (synthRef.current.speaking) {
-      console.log("Speech synthesis in progress, waiting...");
-      setTimeout(() => speak(text), 100); // Retry after a short delay
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => {
-      console.log("Finished in speaking...");
-      handleAutomaticCapture();
-    };
-    synthRef.current.speak(utterance);
-  };
+  const debouncedSendImage = debounce(sendImageToServer, 300);
 
-  const handleAutomaticCapture = useCallback(() => {
-    if (!synthRef.current.speaking) {
-      const imageSrc = capture();
+  const captureAndSend = useCallback(() => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setImgSrc(imageSrc);
       if (imageSrc) {
         fetch(imageSrc)
           .then(res => res.blob())
@@ -61,29 +40,18 @@ const CustomWebcam = () => {
             sendImageToServer(file);
           });
       }
-    } else {
-      console.log("Waiting for speech to finish before capturing next image...");
     }
-  }, [capture]);
-
-  const handleSendAutomaticallyToggle = () => {
-    setIsSendingAutomatically(!isSendingAutomatically);
-    if (!isSendingAutomatically) {
-      handleAutomaticCapture(); // Start the first capture immediately
-    } else {
-      if (sendIntervalId) {
-        clearInterval(sendIntervalId);
-      }
-    }
-  };
+  }, []);
 
   useEffect(() => {
-    return () => {
-      if (sendIntervalId) {
-        clearInterval(sendIntervalId);
-      }
-    };
-  }, [sendIntervalId]);
+    images.forEach(image => {
+      debouncedSendImage(image.file);
+    });
+  }, [images]);
+
+  const onImageChange = (imageList, addUpdateIndex) => {
+    setImages(imageList);
+  };
 
   return (
     <div className="container">
@@ -95,26 +63,30 @@ const CustomWebcam = () => {
         screenshotFormat="image/jpeg"
       />
       {imgSrc && <img src={imgSrc} alt="Captured" style={{ width: "100%" }} />}
-      <button onClick={handleSendAutomaticallyToggle}>
-          {isSendingAutomatically ? 'Stop Automatic Sending' : 'Start Automatic Sending'}
-      </button>
+      <div className="btn-container">
+        <button onClick={captureAndSend}>Capture and Send Photo</button>
+      </div>
       <ImageUploading
         multiple={false}
         value={images}
-        onChange={(imageList) => {
-          if (imageList.length > 0) {
-            sendImageToServer(imageList[0].file);
-          }
-        }}
+        onChange={onImageChange}
         maxNumber={1}
         dataURLKey="data_url"
       >
-        {({ onImageUpload }) => (
-          <button onClick={onImageUpload}>Browse</button>
+        {({ onImageUpload, onImageRemoveAll }) => (
+          <div className="upload__image-wrapper">
+            <button onClick={onImageUpload}>Browse</button>
+            {images.map((image, index) => (
+              <div key={index} className="image-item">
+                <img src={image.data_url} alt="" width="100" />
+                <button onClick={onImageRemoveAll}>Remove</button>
+              </div>
+            ))}
+          </div>
         )}
       </ImageUploading>
     </div>
-  )
+  );
 };
 
 export default CustomWebcam;
