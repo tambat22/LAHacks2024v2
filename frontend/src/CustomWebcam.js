@@ -63,6 +63,7 @@ const CustomWebcam = () => {
         audio={false}
         height={600}
         width={600}
+        mirrored={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
       />
