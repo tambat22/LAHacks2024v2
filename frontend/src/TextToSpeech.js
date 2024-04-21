@@ -6,25 +6,29 @@ const TextToSpeech = ({ text }) => {
   const utterance = useRef(null);
 
   useEffect(() => {
+    // Setting up the new utterance every time text changes
     utterance.current = new SpeechSynthesisUtterance(text);
     utterance.current.onend = () => {
       console.log("Finished in speaking");
+      setIsPaused(false); // Reset pause state when speech ends
     };
+
+    // Speak the text immediately when it is updated
+    if (text) {
+      synth.current.speak(utterance.current);
+    }
 
     // Clean up on component unmount or text change
     return () => {
       synth.current.cancel();
     };
-  }, [text]);
+  }, [text]); // Dependency on 'text' means this effect runs whenever text changes
 
   const handlePlay = () => {
     if (isPaused) {
       synth.current.resume();
-    } else {
-      synth.current.speak(utterance.current);
+      setIsPaused(false);
     }
-
-    setIsPaused(false);
   };
 
   const handlePause = () => {
@@ -41,9 +45,22 @@ const TextToSpeech = ({ text }) => {
 
   return (
     <div>
-      <button onClick={handlePlay}>{isPaused ? "Resume" : "Play"}</button>
-      <button onClick={handlePause}>Pause</button>
-      <button onClick={handleStop}>Stop</button>
+      {/* The Play button now only resumes paused speech */}
+      <button onClick={handlePlay} disabled={!isPaused}>
+        {isPaused ? "Resume" : "Play"}
+      </button>
+      <button
+        onClick={handlePause}
+        disabled={!synth.current.speaking || isPaused}
+      >
+        Pause
+      </button>
+      <button
+        onClick={handleStop}
+        disabled={!synth.current.speaking && !isPaused}
+      >
+        Stop
+      </button>
     </div>
   );
 };
