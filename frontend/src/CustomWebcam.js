@@ -16,13 +16,15 @@ const CustomWebcam = () => {
     const formData = new FormData();
     formData.append("file", imageFile);
 
-    axios.post('http://localhost:5000/upload', formData, {
+    axios.post('http://localhost:5000/upload/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
     })
     .then(response => {
-      const responseText = response.data.text; // Assume 'text' is the key in the response data containing the text
+      console.log("response from server", response.data);
+      const responseText = response.data["description"]; // Assume 'text' is the key in the response data containing the text
+      const is_dangerous = response.data["is_dangerous"];
       console.log('Image uploaded successfully:', responseText);
       setResponseText(responseText); // Update the state to trigger TextToSpeech
     })
