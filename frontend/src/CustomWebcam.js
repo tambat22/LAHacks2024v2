@@ -3,13 +3,16 @@ import Webcam from "react-webcam";
 import axios from 'axios';
 import ImageUploading from 'react-images-uploading';
 import { debounce } from 'lodash';
+import TextToSpeech from './TextToSpeech';
 
 const CustomWebcam = () => {
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
   const [images, setImages] = useState([]);
+  const [responseText, setResponseText] = useState('');
 
-  const sendImageToServer = (imageFile) => {
+  // Debounced function to send image to server
+  const sendImageToServer = useCallback(debounce((imageFile) => {
     const formData = new FormData();
     formData.append("file", imageFile);
 
@@ -19,14 +22,15 @@ const CustomWebcam = () => {
         }
     })
     .then(response => {
-      console.log('Image uploaded successfully:', response.data);
+      const responseText = response.data.text; // Assume 'text' is the key in the response data containing the text
+      console.log('Image uploaded successfully:', responseText);
+      setResponseText(responseText); // Update the state to trigger TextToSpeech
     })
     .catch(error => {
       console.error('Error uploading image:', error);
+      setResponseText("Failed to upload image."); // Set error message for TTS
     });
-  };
-
-  const debouncedSendImage = debounce(sendImageToServer, 300);
+  }, 300), []); // Empty dependency array ensures the function is not recreated on each render
 
   const captureAndSend = useCallback(() => {
     if (webcamRef.current) {
@@ -41,13 +45,13 @@ const CustomWebcam = () => {
           });
       }
     }
-  }, []);
+  }, [sendImageToServer]);
 
   useEffect(() => {
     images.forEach(image => {
-      debouncedSendImage(image.file);
+      sendImageToServer(image.file);
     });
-  }, [images]);
+  }, [images, sendImageToServer]);
 
   const onImageChange = (imageList, addUpdateIndex) => {
     setImages(imageList);
@@ -73,18 +77,11 @@ const CustomWebcam = () => {
         maxNumber={1}
         dataURLKey="data_url"
       >
-        {({ onImageUpload, onImageRemoveAll }) => (
-          <div className="upload__image-wrapper">
-            <button onClick={onImageUpload}>Browse</button>
-            {images.map((image, index) => (
-              <div key={index} className="image-item">
-                <img src={image.data_url} alt="" width="100" />
-                <button onClick={onImageRemoveAll}>Remove</button>
-              </div>
-            ))}
-          </div>
+        {({ onImageUpload }) => (
+          <button onClick={onImageUpload}>Browse</button>
         )}
       </ImageUploading>
+      <TextToSpeech text={responseText} />
     </div>
   );
 };
