@@ -1,45 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const TextToSpeech = ({ text }) => {
   const [isPaused, setIsPaused] = useState(false);
-  const [utterance, setUtterance] = useState(null);
+  const synth = useRef(window.speechSynthesis);
+  const utterance = useRef(null);
 
   useEffect(() => {
-    const synth = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(text);
+    utterance.current = new SpeechSynthesisUtterance(text);
+    utterance.current.onend = () => {
+      console.log("Finished in speaking");
+    };
 
-    setUtterance(u);
-
+    // Clean up on component unmount or text change
     return () => {
-      synth.cancel();
+      synth.current.cancel();
     };
   }, [text]);
 
   const handlePlay = () => {
-    const synth = window.speechSynthesis;
-
     if (isPaused) {
-      synth.resume();
+      synth.current.resume();
+    } else {
+      synth.current.speak(utterance.current);
     }
-
-    synth.speak(utterance);
 
     setIsPaused(false);
   };
 
   const handlePause = () => {
-    const synth = window.speechSynthesis;
-
-    synth.pause();
-
-    setIsPaused(true);
+    if (!synth.current.paused && synth.current.speaking) {
+      synth.current.pause();
+      setIsPaused(true);
+    }
   };
 
   const handleStop = () => {
-    const synth = window.speechSynthesis;
-
-    synth.cancel();
-
+    synth.current.cancel();
     setIsPaused(false);
   };
 
